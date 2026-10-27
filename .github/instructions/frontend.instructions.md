@@ -10,4 +10,3 @@ applyTo: 'public/**'
 * Deshabilita el botón de enviar mientras espera respuesta y muestra "Escribiendo…".
 * Diseño responsivo: debe verse bien a 360 px de ancho.
 * Usa variables CSS en `:root` para colores y soporta `prefers-color-scheme: dark`.
-PASO 5 Armar el harness de agentes Fase B · Pr

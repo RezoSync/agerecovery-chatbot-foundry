@@ -1,17 +1,18 @@
 :root {
   color-scheme: light dark;
-  --page: #f2f5ef;
-  --surface: #ffffff;
-  --ink: #192820;
-  --muted: #68776d;
-  --line: #d9e1d8;
-  --forest: #174734;
-  --forest-hover: #103b2a;
-  --lime: #d3ef86;
-  --coral: #da684e;
-  --assistant: #ffffff;
-  --user: #e4eddd;
-  --focus: #d76a4e;
+  --page: #f5f4ef;
+  --surface: #fffefa;
+  --ink: #252e29;
+  --muted: #637168;
+  --line: #d8ded8;
+  --forest: #355447;
+  --forest-hover: #2b463a;
+  --forest-ink: #f7faef;
+  --lime: #d8c9a5;
+  --coral: #947650;
+  --assistant: #fffefa;
+  --user: #e8ede8;
+  --focus: #947650;
   font-family: Aptos, "Segoe UI", sans-serif;
   color: var(--ink);
   background: var(--page);
@@ -19,18 +20,19 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --page: #151d18;
-    --surface: #202b23;
-    --ink: #eff5ed;
-    --muted: #a9b8ab;
-    --line: #39483c;
-    --forest: #c4e889;
-    --forest-hover: #d3ef9d;
-    --lime: #314624;
-    --coral: #f09378;
-    --assistant: #253229;
-    --user: #334a39;
-    --focus: #f09378;
+    --page: #171d1a;
+    --surface: #222b26;
+    --ink: #f1f3ef;
+    --muted: #b7c1ba;
+    --line: #3b4740;
+    --forest: #a9c1b2;
+    --forest-hover: #bed0c4;
+    --forest-ink: #171d1a;
+    --lime: #3a4b41;
+    --coral: #d7bd93;
+    --assistant: #26302a;
+    --user: #304038;
+    --focus: #d7bd93;
   }
 }
 
@@ -89,7 +91,7 @@ textarea {
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  color: #f7faef;
+  color: var(--forest-ink);
   background: var(--forest);
   font-family: Georgia, serif;
   font-weight: 700;
@@ -106,10 +108,6 @@ textarea {
   font-family: Georgia, "Palatino Linotype", serif;
   font-size: 21px;
   font-weight: 700;
-}
-
-.brand-name span {
-  color: var(--coral);
 }
 
 .topbar-context {
@@ -144,6 +142,11 @@ textarea {
 }
 
 .conversation-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 40px;
 }
 
@@ -162,6 +165,56 @@ h1 {
   font-weight: 500;
   line-height: 1.15;
   overflow-wrap: anywhere;
+}
+
+.booking-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--forest);
+  border-radius: 5px;
+  color: var(--page);
+  background: var(--forest);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 140ms ease, transform 140ms ease;
+}
+
+.booking-button[hidden] {
+  display: none;
+}
+
+.booking-button:hover {
+  background: var(--forest-hover);
+  transform: translateY(-1px);
+}
+
+.booking-button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.transparency-notice {
+  margin: -20px 0 24px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--coral);
+  border-radius: 5px;
+  color: var(--ink);
+  background: var(--surface);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.booking-error {
+  margin: -14px 0 16px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .messages {
@@ -287,7 +340,7 @@ h1 {
   padding: 0 15px;
   border: 0;
   border-radius: 5px;
-  color: #f7faef;
+  color: var(--forest-ink);
   background: var(--forest);
   cursor: pointer;
   font-size: 14px;
@@ -364,6 +417,16 @@ h1 {
 
   .conversation-heading {
     margin-bottom: 30px;
+  }
+
+  .booking-button {
+    width: 100%;
+  }
+
+  .transparency-notice {
+    margin-top: -12px;
+    margin-bottom: 20px;
+    font-size: 13px;
   }
 
   h1 {

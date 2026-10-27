@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { AIProjectClient } from "@azure/ai-projects";
 import { DefaultAzureCredential } from "@azure/identity";
 
@@ -28,11 +30,24 @@ async function main() {
     }
 
     const model = process.env.FOUNDRY_MODEL_DEPLOYMENT?.trim();
-    const instructions = process.env.FOUNDRY_AGENT_INSTRUCTIONS?.trim();
-    if (!model || !instructions) {
-      console.error(
-        "Para crear un agente faltante, configura FOUNDRY_MODEL_DEPLOYMENT y FOUNDRY_AGENT_INSTRUCTIONS.",
-      );
+    if (!model) {
+      console.error("Para crear un agente faltante, configura FOUNDRY_MODEL_DEPLOYMENT.");
+      process.exitCode = 1;
+      return;
+    }
+
+    const instructionsPath = path.join(import.meta.dirname, "..", "agent", "instrucciones.md");
+    let instructions;
+    try {
+      instructions = (await readFile(instructionsPath, "utf8")).trim();
+    } catch {
+      console.error("No se pudo leer el archivo agent/instrucciones.md.");
+      process.exitCode = 1;
+      return;
+    }
+
+    if (!instructions) {
+      console.error("El archivo agent/instrucciones.md está vacío.");
       process.exitCode = 1;
       return;
     }

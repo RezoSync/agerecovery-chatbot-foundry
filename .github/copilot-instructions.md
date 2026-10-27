@@ -1,7 +1,9 @@
-# Instrucciones del proyecto: Chatbot Foundry Certificador en App Service
+# Instrucciones del proyecto: Chatbot Age Recovery en App Service
 
 ## Qué es este proyecto
-Página web de una sola vista con un chatbot con IA. El frontend (HTML, CSS y JS sin frameworks) llama a un backennd node.js con Express y el backend conversa con un agente de Micrsoft Foundry. Se despliega en Azure App Services (Linux, Node 24 LTS)
+Página web de una sola vista para Age Recovery, clínica de medicina estética en San Luis Río Colorado, Sonora. El frontend (HTML, CSS y JavaScript sin frameworks) llama a un backend Node.js con Express y el backend conversa con un agente de Microsoft Foundry. Se despliega en Azure App Service (Linux, Node 24 LTS).
+
+El asistente responde preguntas frecuentes y comparte cuidados posteriores generales. No diagnostica, no da dosis ni precios y deriva toda duda clínica al médico.
 
 ## Entorno de desarrollo
 - Windows 11 con PowerShell 7.
@@ -27,6 +29,7 @@ Página web de una sola vista con un chatbot con IA. El frontend (HTML, CSS y JS
 - Nunca escribas llaves, tokens ni endpoints reales en el código.
  Todo sale de variables de entorno: `FOUNDRY_PROJECT_ENDPOINT`, `FOUNDRY_AGENT_NAME`.
 - En Azure se usa identidad administrada (managed identity), no API keys.
+- El límite de solicitudes por IP se conserva en memoria del proceso; no hay base de datos ni autenticación de usuarios.
 - Valida la entrada (1 a 2000 caracteres) y responde 422 si no cumple.
 - Si Foundry falla, responde 502 con un mensaje genérico; no filtres trazas.
 ## Estilo de código
@@ -37,5 +40,3 @@ Página web de una sola vista con un chatbot con IA. El frontend (HTML, CSS y JS
 - Salud: `Invoke-RestMethod http://localhost:3000/health` debe devolver `status: ok`
 - Antes de desplegar, confirma que `package.json` incluye todo lo que se importa
  y que el script `start` es `node server.js`.
-
-Regresamos 6:07pm

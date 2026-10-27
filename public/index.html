@@ -3,21 +3,21 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f2f5ef">
-    <title>Certifica | Asistente</title>
+    <meta name="theme-color" content="#f5f4ef">
+    <title>Age Recovery | Asistente virtual</title>
     <link rel="stylesheet" href="/styles.css">
     <script src="/app.js" defer></script>
   </head>
   <body>
     <div class="app-layout">
       <header class="topbar">
-        <a class="brand" href="/" aria-label="Certifica, inicio">
-          <span class="brand-mark" aria-hidden="true">C</span>
-          <span class="brand-name">certifica<span>.</span></span>
+        <a class="brand" href="/" aria-label="Age Recovery, inicio">
+          <span class="brand-mark" aria-hidden="true">A</span>
+          <span class="brand-name">Age Recovery</span>
         </a>
         <div class="topbar-context">
           <span class="context-dot" aria-hidden="true"></span>
-          <span>Asistente de certificación</span>
+          <span>Medicina estética</span>
         </div>
       </header>
 
@@ -26,14 +26,24 @@
           <div class="conversation-heading">
             <p class="eyebrow">CONSULTA</p>
             <h1>¿En qué te puedo orientar?</h1>
+            <a class="booking-button" id="booking-button" href="#" target="_blank" rel="noopener noreferrer" hidden>
+              Agendar valoración
+            </a>
           </div>
+
+          <aside class="transparency-notice" aria-label="Aviso importante">
+            Soy un asistente de IA. No sustituyo al médico. No compartas datos personales ni de salud.
+          </aside>
+          <p class="booking-error" id="booking-error" role="status" hidden>
+            No se pudo cargar el enlace de agenda.
+          </p>
 
           <div class="messages" id="messages" aria-live="polite" aria-relevant="additions text">
             <article class="message assistant-message">
-              <span class="message-avatar" aria-hidden="true">C</span>
+              <span class="message-avatar" aria-hidden="true">A</span>
               <div class="message-content">
-                <p class="message-author">Certifica <span>Asistente</span></p>
-                <p class="message-text">Hola. ¿Qué tema de certificación quieres revisar?</p>
+                <p class="message-author">Age Recovery <span>Asistente virtual</span></p>
+                <p class="message-text">Hola. Puedo compartir información general sobre nuestros servicios y cuidados posteriores. Para dudas clínicas, consulta al médico.</p>
               </div>
             </article>
           </div>

@@ -4,8 +4,36 @@ const sendButton = document.querySelector("#send-button");
 const messages = document.querySelector("#messages");
 const typingIndicator = document.querySelector("#typing-indicator");
 const formError = document.querySelector("#form-error");
+const bookingButton = document.querySelector("#booking-button");
+const bookingError = document.querySelector("#booking-error");
 
 let conversationId = null;
+
+async function loadBookingLink() {
+  try {
+    const response = await fetch("/api/config");
+    if (!response.ok) {
+      throw new Error("No se pudo cargar la configuración de agenda.");
+    }
+
+    const data = await response.json();
+    if (!data.clinicContactUrl) {
+      return;
+    }
+
+    const bookingUrl = new URL(data.clinicContactUrl, window.location.origin);
+    if (!["http:", "https:"].includes(bookingUrl.protocol)) {
+      throw new Error("El enlace de agenda no es válido.");
+    }
+
+    bookingButton.href = bookingUrl.href;
+    bookingButton.hidden = false;
+  } catch {
+    bookingError.hidden = false;
+  }
+}
+
+loadBookingLink();
 
 function appendMessage(text, sender) {
   const article = document.createElement("article");
@@ -15,17 +43,17 @@ function appendMessage(text, sender) {
     const avatar = document.createElement("span");
     avatar.className = "message-avatar";
     avatar.setAttribute("aria-hidden", "true");
-    avatar.textContent = "C";
+    avatar.textContent = "A";
 
     const content = document.createElement("div");
     content.className = "message-content";
 
     const author = document.createElement("p");
     author.className = "message-author";
-    author.textContent = "Certifica";
+    author.textContent = "Age Recovery";
 
     const role = document.createElement("span");
-    role.textContent = "Asistente";
+    role.textContent = "Asistente virtual";
     author.append(role);
 
     const messageText = document.createElement("p");
@@ -82,6 +110,10 @@ form.addEventListener("submit", async (event) => {
     const data = await response.json();
 
     if (!response.ok) {
+      if (response.status === 429) {
+        appendMessage(data.error || "Has enviado varias solicitudes. Espera un momento e inténtalo de nuevo.", "assistant");
+        return;
+      }
       throw new Error(data.error || "Chat request failed.");
     }
 
