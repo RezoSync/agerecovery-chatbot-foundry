@@ -35,6 +35,10 @@ async function loadBookingLink() {
 
 loadBookingLink();
 
+function cleanAssistantResponse(text) {
+  return text.replace(/【[^】]*】/g, "").replace(/\s+([.,;:!?])/g, "$1");
+}
+
 function appendMessage(text, sender) {
   const article = document.createElement("article");
   article.className = `message ${sender}-message`;
@@ -118,7 +122,7 @@ form.addEventListener("submit", async (event) => {
     }
 
     conversationId = data.conversation_id;
-    appendMessage(data.reply, "assistant");
+    appendMessage(cleanAssistantResponse(data.reply), "assistant");
   } catch {
     appendMessage("No fue posible obtener una respuesta. Inténtalo de nuevo.", "assistant");
   } finally {

@@ -11,7 +11,8 @@
   --link: #25B7E8;
   --gold: #B89456;
   --assistant: #06263F;
-  --user: #008AC4;
+  --user: #006E9C;
+  --user-ink: #FFFFFF;
   --focus: #008AC4;
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   color: var(--ink);
@@ -238,11 +239,16 @@ textarea:focus-visible {
   border: 1px solid var(--accent);
   border-radius: 8px 8px 2px 8px;
   background: var(--user);
-  color: var(--accent-ink);
+  color: var(--user-ink);
+  font-weight: 500;
+}
+
+.user-message .message-author {
+  font-weight: 500;
 }
 
 .user-message .message-author span {
-  color: var(--accent-ink);
+  color: var(--user-ink);
 }
 
 .message-avatar {
