@@ -4,7 +4,7 @@ description: 'Usar al crear o modificar la interfaz web del chatbot.'
 applyTo: 'public/**'
 ---
 # Reglas del frontend
-* Solo HTML, CSS y JavaScript vanilla (ES2020+). Sin frameworks ni CDNs.
+* Solo HTML, CSS y JavaScript vanilla (ES2020+). Sin frameworks ni CDNs, excepto Google Fonts cargadas únicamente desde `fonts.googleapis.com` y `fonts.gstatic.com`.
 * Inserta el texto del bot con `textContent`, nunca con `innerHTML` (evita XSS).
 * Guarda el `conversation_id` en una variable de JS; se reinicia al recargar.
 * Deshabilita el botón de enviar mientras espera respuesta y muestra "Escribiendo…".

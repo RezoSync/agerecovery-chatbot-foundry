@@ -1,39 +1,21 @@
 :root {
-  color-scheme: light dark;
-  --page: #f5f4ef;
-  --surface: #fffefa;
-  --ink: #252e29;
-  --muted: #637168;
-  --line: #d8ded8;
-  --forest: #355447;
-  --forest-hover: #2b463a;
-  --forest-ink: #f7faef;
-  --lime: #d8c9a5;
-  --coral: #947650;
-  --assistant: #fffefa;
-  --user: #e8ede8;
-  --focus: #947650;
-  font-family: Aptos, "Segoe UI", sans-serif;
+  color-scheme: dark;
+  --page: #001B33;
+  --surface: #06263F;
+  --ink: #F6F8FB;
+  --muted: #C5D2DC;
+  --line: #31536A;
+  --accent: #008AC4;
+  --accent-hover: #079BD7;
+  --accent-ink: #001B33;
+  --link: #25B7E8;
+  --gold: #B89456;
+  --assistant: #06263F;
+  --user: #008AC4;
+  --focus: #008AC4;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   color: var(--ink);
   background: var(--page);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --page: #171d1a;
-    --surface: #222b26;
-    --ink: #f1f3ef;
-    --muted: #b7c1ba;
-    --line: #3b4740;
-    --forest: #a9c1b2;
-    --forest-hover: #bed0c4;
-    --forest-ink: #171d1a;
-    --lime: #3a4b41;
-    --coral: #d7bd93;
-    --assistant: #26302a;
-    --user: #304038;
-    --focus: #d7bd93;
-  }
 }
 
 * {
@@ -50,8 +32,8 @@ body {
     135deg,
     transparent 0,
     transparent 42px,
-    color-mix(in srgb, var(--forest) 3%, transparent) 43px,
-    color-mix(in srgb, var(--forest) 3%, transparent) 44px
+    color-mix(in srgb, var(--gold) 3%, transparent) 43px,
+    color-mix(in srgb, var(--gold) 3%, transparent) 44px
   );
 }
 
@@ -82,7 +64,7 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: var(--ink);
+  color: var(--link);
   text-decoration: none;
 }
 
@@ -91,9 +73,9 @@ textarea {
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  color: var(--forest-ink);
-  background: var(--forest);
-  font-family: Georgia, serif;
+  color: var(--accent-ink);
+  background: var(--gold);
+  font-family: "Playfair Display", Georgia, serif;
   font-weight: 700;
 }
 
@@ -105,7 +87,7 @@ textarea {
 }
 
 .brand-name {
-  font-family: Georgia, "Palatino Linotype", serif;
+  font-family: "Playfair Display", Georgia, serif;
   font-size: 21px;
   font-weight: 700;
 }
@@ -122,8 +104,8 @@ textarea {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--coral);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--coral) 16%, transparent);
+  background: var(--gold);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
 }
 
 .chat-shell {
@@ -152,7 +134,7 @@ textarea {
 
 .eyebrow {
   margin: 0 0 12px;
-  color: var(--coral);
+  color: var(--gold);
   font-size: 11px;
   font-weight: 700;
 }
@@ -160,7 +142,7 @@ textarea {
 h1 {
   max-width: 580px;
   margin: 0;
-  font-family: Georgia, "Palatino Linotype", serif;
+  font-family: "Playfair Display", Georgia, serif;
   font-size: 36px;
   font-weight: 500;
   line-height: 1.15;
@@ -174,10 +156,10 @@ h1 {
   justify-content: center;
   min-height: 42px;
   padding: 0 16px;
-  border: 1px solid var(--forest);
+  border: 1px solid var(--accent);
   border-radius: 5px;
-  color: var(--page);
-  background: var(--forest);
+  color: var(--accent-ink);
+  background: var(--accent);
   font-size: 14px;
   font-weight: 700;
   text-align: center;
@@ -190,12 +172,14 @@ h1 {
 }
 
 .booking-button:hover {
-  background: var(--forest-hover);
+  background: var(--accent-hover);
   transform: translateY(-1px);
 }
 
-.booking-button:focus-visible {
-  outline: 2px solid var(--focus);
+a:focus-visible,
+button:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 
@@ -203,7 +187,7 @@ h1 {
   margin: -20px 0 24px;
   padding: 12px 14px;
   border: 1px solid var(--line);
-  border-left: 3px solid var(--coral);
+  border-left: 3px solid var(--gold);
   border-radius: 5px;
   color: var(--ink);
   background: var(--surface);
@@ -240,13 +224,25 @@ h1 {
   align-self: flex-start;
 }
 
+.assistant-message .message-content {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 3px 12px 12px;
+  background: var(--assistant);
+}
+
 .user-message {
   align-self: flex-end;
   justify-content: flex-end;
   padding: 13px 16px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--accent);
   border-radius: 8px 8px 2px 8px;
   background: var(--user);
+  color: var(--accent-ink);
+}
+
+.user-message .message-author span {
+  color: var(--accent-ink);
 }
 
 .message-avatar {
@@ -268,6 +264,10 @@ h1 {
   margin: 0 0 6px;
   font-size: 13px;
   font-weight: 700;
+}
+
+.assistant-message .message-author {
+  color: var(--gold);
 }
 
 .message-author span {
@@ -308,7 +308,7 @@ h1 {
 
 .composer:focus-within {
   border-color: var(--focus);
-  outline: 2px solid color-mix(in srgb, var(--focus) 22%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--focus) 62%, transparent);
   outline-offset: 1px;
 }
 
@@ -340,8 +340,8 @@ h1 {
   padding: 0 15px;
   border: 0;
   border-radius: 5px;
-  color: var(--forest-ink);
-  background: var(--forest);
+  color: var(--accent-ink);
+  background: var(--accent);
   cursor: pointer;
   font-size: 14px;
   font-weight: 700;
@@ -349,7 +349,7 @@ h1 {
 }
 
 .send-button:hover:not(:disabled) {
-  background: var(--forest-hover);
+  background: var(--accent-hover);
   transform: translateY(-1px);
 }
 
@@ -359,7 +359,7 @@ h1 {
 }
 
 .send-arrow {
-  color: var(--lime);
+  color: var(--accent-ink);
   font-size: 18px;
   line-height: 1;
 }
@@ -370,7 +370,7 @@ h1 {
   bottom: -25px;
   left: 0;
   margin: 0;
-  color: var(--coral);
+  color: var(--gold);
   font-size: 12px;
 }
 
