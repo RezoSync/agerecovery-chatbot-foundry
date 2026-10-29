@@ -1,158 +1,186 @@
-# Chatbot Age Recovery
+# Age Recovery: asistente virtual con Microsoft Foundry
 
-Prototipo web para que pacientes y visitantes consulten preguntas frecuentes y cuidados posteriores generales de Age Recovery, clínica de medicina estética en San Luis Río Colorado, Sonora. El navegador muestra el chat y un servidor Node.js envía las consultas a un agente de Microsoft Foundry, conservando el contexto entre mensajes de la sesión.
+Prototipo de la **Fase 2 (Opción B)** del curso *Fundamentos de IA con Tecnologías Microsoft (AB-730 / AI-901)*.
+**Alumno:** Vladimir Emanuel Alcalá Félix · **Instructor:** Jesús Brujería
 
-El asistente de IA no sustituye al médico: no diagnostica, no indica dosis ni precios y deriva las dudas clínicas al médico. No compartas datos personales ni de salud. Este prototipo no usa autenticación ni base de datos.
+**Prototipo en línea (sin login):** https://agerecovery-api-7m4q9x.azurewebsites.net
 
-- [Revisa este PDF Tutorial](tutorial-copilot-foundry-appservice-windows-node.pdf)
+> Todos los datos usados en las pruebas son **ficticios o simulados**. El FAQ se generó a partir de la información pública del sitio web de la clínica y **no ha sido revisado por un profesional médico**.
 
-## ¿Qué hace?
+---
 
-1. Abre una interfaz de chat en el navegador.
-2. Envía cada mensaje al servidor, no directamente a Microsoft Foundry.
-3. El servidor valida el mensaje y consulta al agente configurado.
-4. Devuelve la respuesta y conserva el identificador de conversación para los siguientes turnos.
+## 1. Problema que resuelve
 
-La aplicación rechaza mensajes vacíos o de más de 2000 caracteres, y limita a 20 las solicitudes por IP cada minuto en memoria. Si Foundry no está configurado o no responde, muestra un mensaje genérico y no expone credenciales ni detalles internos.
+Los pacientes y visitantes de una clínica de medicina estética hacen las mismas preguntas una y otra vez: qué tratamientos existen, qué cuidados seguir después de uno, cómo agendar una valoración. Responderlas consume tiempo del personal, y fuera de horario quedan sin respuesta.
 
-## Requisitos
+Al mismo tiempo, es un contexto sensible: una IA mal diseñada podría dar dosis, cotizar precios, diagnosticar o tranquilizar a alguien que en realidad tiene una complicación.
 
-- Windows 11 y PowerShell.
-- Node.js 24 LTS y npm.
-- Visual Studio Code para trabajar con los agentes de GitHub Copilot.
-- Acceso a un proyecto de Microsoft Foundry y a un agente para poder usar el chat.
-- Azure CLI solo si necesitas iniciar sesión localmente con `az login`.
+## 2. Solución
 
-## Archivos principales
+Un chat web que responde **únicamente información general** de la clínica (servicios y cuidados posteriores) usando un agente de **Microsoft Foundry** con **File Search** sobre un FAQ de 54 preguntas. El agente tiene reglas explícitas de seguridad:
 
-- `server.js`: servidor Express, archivos web y rutas `/api/chat`, `/api/config` y `/health`.
-- `public/`: interfaz del chat, estilos y comportamiento del navegador.
-- `scripts/create-agent.js`: comprueba si existe el agente de Foundry y, si falta, puede crearlo.
-- `agent/instrucciones.md`: instrucciones provisionales del agente; deben sustituirse por el texto aprobado por el médico.
-- `.env.example`: plantilla de variables de entorno. El archivo `.env` local no se incluye en Git.
-- `.github/copilot-instructions.md`: reglas que Copilot debe seguir al trabajar en este proyecto.
-- `.github/agents/`: agentes personalizados de Copilot para planificar, implementar y desplegar.
+- Se presenta siempre como asistente de IA y **no sustituye al médico**.
+- **No da dosis, no cotiza precios, no diagnostica.** Para eso deriva a la clínica.
+- Ante **señales de alarma** (dolor intenso, hinchazón, dificultad para respirar, fiebre, etc.) responde un mensaje corto: comunicarse de inmediato con la clínica o llamar al 911.
+- **No pide ni repite datos personales o de salud**; recomienda no compartirlos.
+- Resiste intentos de saltarse sus instrucciones (*jailbreak*).
 
-## Preparar el proyecto
+## 3. Capturas del prototipo
 
-1. Abre la carpeta del proyecto en Visual Studio Code.
-2. Abre una terminal de PowerShell desde **Terminal > Nueva terminal**.
-3. Confirma las versiones instaladas:
+| Pantalla inicial con aviso de IA | Servicios (respuesta del FAQ) |
+|---|---|
+| ![Inicio](docs/images/01-inicio.png) | ![Servicios](docs/images/02-servicios.png) |
 
-   ```powershell
-   node --version
-   npm --version
-   ```
+| Precio: no cotiza | Señal de alarma |
+|---|---|
+| ![Precio](docs/images/03-precio.png) | ![Alarma](docs/images/04-alarma.png) |
 
-   Node.js debe ser la versión 24 o posterior.
+| Intento de jailbreak | Datos personales |
+|---|---|
+| ![Jailbreak](docs/images/05-jailbreak.png) | ![Datos personales](docs/images/06-datos-personales.png) |
 
-4. Instala las dependencias:
+**Vista móvil**
 
-   ```powershell
-   npm install
-   ```
+![Móvil](docs/images/07-movil.png)
 
-5. Crea tu archivo local de configuración a partir del ejemplo:
+## 4. Arquitectura
 
-   ```powershell
-   Copy-Item .env.example .env
-   ```
+```mermaid
+flowchart LR
+    U[Usuario<br/>navegador] -->|HTTPS| A[Azure App Service<br/>Linux B1 · Node.js 24<br/>Express]
+    A -->|Identidad administrada<br/>rol Foundry User| F[Proyecto Microsoft Foundry<br/>Agent Service]
+    F --> M[Modelo gpt-5]
+    F --> V[(File Search<br/>vector store<br/>age-recovery-faq)]
+    V --- D[faq-age-recovery.md<br/>54 preguntas]
+```
 
-6. Abre `.env` y configura estas variables:
+Flujo: el navegador envía el mensaje a `/api/chat`; el servidor Express lo reenvía al agente de Foundry (`agent_reference`) conservando el `conversation_id` de la sesión; el agente consulta el FAQ con File Search y responde. El servidor **no usa API keys**: se autentica con la identidad administrada del App Service.
 
-   ```dotenv
-   FOUNDRY_PROJECT_ENDPOINT=https://<endpoint-de-tu-proyecto>
-   FOUNDRY_AGENT_NAME=<nombre-de-tu-agente>
-   CLINIC_CONTACT_URL=<URL-pública-para-agendar>
-   ```
+## 5. Servicios de Azure utilizados
 
-   Obtén el endpoint en la información de conexión del proyecto de Foundry y usa el nombre exacto del agente. Sustituye `CLINIC_CONTACT_URL` por el enlace público aprobado para agendar; el botón no se muestra si está vacía. No compartas ni subas `.env` al repositorio. No agregues claves o tokens: el proyecto usa `DefaultAzureCredential` para autenticarse.
+| Servicio | Uso | Detalle |
+|---|---|---|
+| Microsoft Foundry (proyecto y agente) | Orquesta el agente `agerecovery-agent` (versión 4) | Región West US 3 |
+| Modelo `gpt-5` | Genera las respuestas | Desplegado en Foundry |
+| File Search (vector store `age-recovery-faq`) | Da al agente el conocimiento del FAQ | Sin Azure AI Search ni Foundry IQ |
+| Azure App Service (Linux B1, Node 24) | Aloja el servidor y el frontend | Un solo recurso, aprox. 0.017 USD/hora |
+| Identidad administrada + rol *Foundry User* | Autenticación sin claves | Sin secretos en el código |
 
-7. Inicia sesión en Azure desde PowerShell si todavía no lo hiciste:
+## 6. IA responsable
 
-   ```powershell
-   az login
-   ```
+La solución se evaluó con los seis principios de Microsoft para IA responsable.
 
-   La cuenta debe tener permisos para usar el proyecto/agente de Foundry. Si la autenticación falla, confirma que iniciaste sesión con la cuenta correcta y que tiene el rol de acceso necesario.
+### 6.1 Equidad
 
-## Ejecutar en local
+| Riesgo | Medida | Evidencia |
+|---|---|---|
+| Respuestas distintas según quién pregunta | El agente responde solo con el FAQ de la clínica y no pide ni usa edad, sexo, origen u otras características | El agente no solicita datos personales (captura `06-datos-personales.png`) |
+| Estereotipos sobre belleza o apariencia | Las instrucciones limitan al agente a información de servicios y cuidados; no emite juicios sobre el aspecto de las personas | `agent/instrucciones.md` |
 
-1. Desde la carpeta del proyecto, inicia el modo de desarrollo:
+*Limitación honesta:* no se realizó una evaluación formal de sesgos con grupos de prueba. Está listado en la sección 7.
 
-   ```powershell
-   npm run dev
-   ```
+### 6.2 Confiabilidad y seguridad
 
-   El servidor usa el puerto `3000` de forma predeterminada y se reinicia al detectar cambios en `server.js`.
+| Riesgo | Medida | Evidencia |
+|---|---|---|
+| Complicación médica real tratada como consulta informativa | Sección *Señales de alarma* en las instrucciones: respuesta corta, derivación a la clínica y 911; no explica el síntoma ni menciona medicamentos | `04-alarma.png` |
+| Dosis o cotizaciones inventadas | El agente indica que la clínica no publica precios y que las dosis las define el médico | `03-precio.png` |
+| Jailbreak ("ignora tus instrucciones…") | El filtro de contenido de Foundry bloquea la solicitud y el servidor devuelve un mensaje fijo | `05-jailbreak.png` |
+| Abuso o saturación del servicio | Límite de 20 peticiones por minuto por IP | `server.js` |
+| Respuestas fuera de la base de conocimiento | File Search sobre un FAQ acotado de 54 preguntas | `agent/faq-age-recovery.md` |
 
-2. Abre [http://localhost:3000](http://localhost:3000) en el navegador.
-3. Escribe una pregunta general sobre los servicios o sus cuidados posteriores y presiona **Enviar**. Presiona Enter para enviar o Shift+Enter para añadir una línea.
-4. Para detener el servidor, vuelve a la terminal y presiona Ctrl+C.
+### 6.3 Privacidad y seguridad de los datos
 
-Comprueba que el servidor está activo con otra terminal de PowerShell:
+| Riesgo | Medida | Evidencia |
+|---|---|---|
+| El usuario comparte datos personales o de salud | El aviso de IA lo desaconseja y el agente no los repite ni los usa | `01-inicio.png`, `06-datos-personales.png` |
+| Filtración de secretos | Sin API keys: identidad administrada con rol *Foundry User*. `.env` no está en Git ni en el paquete desplegado | `.gitignore`, App Settings con solo `FOUNDRY_PROJECT_ENDPOINT` y `FOUNDRY_AGENT_NAME` |
+| Datos en los registros | Los logs del servidor **no guardan el contenido** de los mensajes | `server.js` |
+| Inyección de HTML (XSS) | El texto del bot se inserta con `textContent`, nunca con `innerHTML` | `public/app.js` |
+| Sin cuentas ni login | No se recolectan identidades; la conversación vive solo en memoria de la sesión y se reinicia al recargar | Diseño del prototipo |
+
+### 6.4 Inclusión
+
+| Riesgo | Medida | Evidencia |
+|---|---|---|
+| Texto difícil de leer | Contraste WCAG AA verificado: texto claro sobre tarjeta 14.55:1, dorado sobre tarjeta 5.46:1, enlaces 6.65:1, burbuja del usuario (texto blanco) 5.66:1 | `public/styles.css` |
+| Uso solo con mouse | Foco visible con teclado, etiquetas ARIA (`aria-label`, `aria-live="polite"`), área de conversación semántica | `public/index.html` |
+| Uso en celular | Diseño responsive, probado en vista móvil | `07-movil.png` |
+| Idioma | Interfaz y respuestas en español | Capturas |
+
+### 6.5 Transparencia
+
+| Riesgo | Medida | Evidencia |
+|---|---|---|
+| Que el usuario crea que habla con una persona o con un médico | Aviso fijo: «Soy un asistente de IA. No sustituyo al médico. No compartas datos personales ni de salud.» y etiqueta «Asistente virtual» en cada respuesta | `01-inicio.png` |
+| No saber qué puede o no hacer el asistente | El saludo inicial indica el alcance: información general de servicios y cuidados posteriores | `01-inicio.png` |
+| Opacidad en las reglas | Las instrucciones del agente están versionadas y públicas en el repositorio | `agent/instrucciones.md` |
+
+### 6.6 Rendición de cuentas
+
+| Riesgo | Medida | Evidencia |
+|---|---|---|
+| Nadie responde por lo que dice la IA | Toda decisión clínica se deriva al médico de la clínica; el asistente no actúa como autoridad | `03-precio.png`, `04-alarma.png` |
+| Cambios sin control | Las instrucciones y el conocimiento se versionan en Git y el agente tiene versiones numeradas en Foundry | Historial de commits |
+| Resultados no verificados | Pruebas documentadas con capturas (servicios, precio, alarma, jailbreak, datos personales) | Sección 3 |
+| Contenido médico sin revisión | Se declara expresamente que el FAQ no fue revisado por un profesional; requeriría revisión del responsable médico antes de uso real | Sección 7 |
+
+## 7. Limitaciones conocidas
+
+- **Sin login:** cualquier persona con la URL puede usarlo, por requisito de la entrega. El límite de 20 peticiones por minuto por IP es la única barrera.
+- **Datos ficticios:** las pruebas usan datos inventados. No debe usarse con datos reales de pacientes.
+- **FAQ sin revisión médica:** se generó desde el sitio web de la clínica. Antes de un uso real debe validarlo un profesional de salud.
+- **Sin evaluación formal de sesgos:** se probaron escenarios representativos, no una batería sistemática con grupos distintos.
+- **Pruebas de seguridad acotadas:** se probó un caso de jailbreak, uno de señales de alarma y uno de datos personales; no es una auditoría exhaustiva.
+- **Modelo no determinista:** la redacción puede variar entre ejecuciones.
+- **Detalles cosméticos:** pueden aparecer restos de citas del FAQ; el frontend limpia los más comunes (espacios antes de puntuación y marcadores `【…】`).
+- **Fuentes externas:** el navegador carga Playfair Display y Plus Jakarta Sans desde Google Fonts.
+- **Límite por IP en memoria:** se reinicia con el servidor y no se comparte entre instancias.
+
+## 8. Estructura del repositorio
+
+```
+agent/
+  instrucciones.md        Reglas del agente (transparencia, seguridad, privacidad)
+  faq-age-recovery.md     FAQ de 54 preguntas (conocimiento para File Search)
+docs/images/              Capturas de evidencia
+public/                   Frontend (HTML, CSS y JavaScript sin frameworks)
+scripts/
+  create-agent.js         Crea el agente en Foundry
+  add-knowledge.js        Sube el FAQ al vector store y crea una nueva versión del agente
+server.js                 Express: /health, /api/config, /api/chat
+.env.example              Variables necesarias (sin valores)
+```
+
+## 9. Cómo ejecutarlo en local
+
+Requisitos: Node.js 24 o superior, Azure CLI con sesión iniciada (`az login`) y un proyecto de Foundry con un despliegue de modelo.
 
 ```powershell
-Invoke-RestMethod http://localhost:3000/health
+npm install
+copy .env.example .env      # completa las variables (ver abajo)
+npm run create-agent        # crea el agente si no existe
+npm run add-knowledge       # sube el FAQ y crea una nueva versión con File Search
+npm run dev                 # inicia el servidor con .env cargado
 ```
 
-La respuesta esperada es `status: ok`.
+Variables de `.env`:
 
-## Agente de Microsoft Foundry
+| Variable | Uso |
+|---|---|
+| `FOUNDRY_PROJECT_ENDPOINT` | Endpoint del proyecto de Foundry |
+| `FOUNDRY_AGENT_NAME` | Nombre del agente (`agerecovery-agent`) |
+| `FOUNDRY_MODEL_DEPLOYMENT` | Despliegue del modelo (solo para crear el agente y agregar conocimiento) |
+| `CLINIC_CONTACT_URL` | Opcional: enlace público para el botón «Agendar valoración» (si está vacía, el botón no se muestra) |
 
-El agente de Foundry es el asistente que contesta dentro del chat. Se configura con `FOUNDRY_PROJECT_ENDPOINT` y `FOUNDRY_AGENT_NAME` en `.env`. El backend se encarga de la comunicación y el navegador no recibe credenciales de Azure.
+Abre `http://localhost:3000` (`/health` responde `{"status":"ok"}`). Cada cambio en `agent/instrucciones.md` requiere volver a correr `npm run add-knowledge`.
 
-El script `create-agent` puede crear el agente si no existe. Configura también esta variable en `.env`:
+## 10. Despliegue en Azure
 
-```dotenv
-FOUNDRY_MODEL_DEPLOYMENT=<nombre-del-despliegue-del-modelo>
-```
+El servidor se publica en Azure App Service (Linux B1, Node 24) con un ZIP que contiene **solo** `package.json`, `package-lock.json`, `server.js` y `public/` (sin `.env`, `node_modules`, `.git`, `.github` ni `scripts`), usando `az webapp deploy --type zip`. El App Service usa identidad administrada con el rol *Foundry User* sobre el recurso de Foundry; las únicas App Settings son `FOUNDRY_PROJECT_ENDPOINT` y `FOUNDRY_AGENT_NAME`. Como no se configuró `CLINIC_CONTACT_URL`, el botón «Agendar valoración» no aparece; el agente indica agendar por WhatsApp o con el formulario del sitio de la clínica.
 
-Las instrucciones se leen desde `agent/instrucciones.md`. Sustituye el texto provisional por las instrucciones aprobadas por el médico antes de crear el agente.
+> **Lección aprendida:** `Compress-Archive` de PowerShell genera rutas internas con `\` y el despliegue falla con HTTP 400. Hay que crear el ZIP con `System.IO.Compression` usando `/` en los nombres de entrada.
 
-Después ejecuta:
+## 11. Antes y después (versiones del agente)
 
-```powershell
-npm run create-agent
-```
-
-El comando no modifica un agente que ya exista. Si debe crear uno nuevo, necesita un despliegue de modelo válido y las instrucciones del asistente. Revisa en Foundry que el modelo esté disponible y que tu cuenta tenga permisos.
-
-## Agentes de GitHub Copilot en este repositorio
-
-Estos agentes ayudan a desarrollar y operar el proyecto desde Copilot Chat. **No son el asistente de certificación** que atiende a los visitantes del sitio; ese es el agente de Foundry explicado arriba.
-
-Para usarlos:
-
-1. Abre el proyecto en Visual Studio Code e inicia sesión en GitHub Copilot.
-2. Abre Copilot Chat.
-3. En el selector de agente/modo del chat, elige el agente que quieras usar. Los agentes personalizados del proyecto están en `.github/agents/`.
-4. Describe la tarea con contexto y revisa el resultado antes de aceptar cambios o ejecutar comandos.
-
-Agentes disponibles:
-
-- **Arquitecto**: inspecciona el proyecto y propone un plan. No edita archivos ni ejecuta comandos. Úsalo primero si quieres acordar el alcance de un cambio.
-- **Constructor**: implementa paso a paso un plan aprobado, con cambios mínimos y validaciones. Puedes pedirlo después de revisar el plan del Arquitecto.
-- **Desplegador**: guía el despliegue a Azure App Service en Linux con Node 24 e identidad administrada. Pide confirmación antes de crear, borrar o reemplazar recursos.
-
-El Constructor tiene una opción para pasar al Desplegador cuando la aplicación ya funciona localmente. Copilot también recibe las reglas generales de `.github/copilot-instructions.md` y las instrucciones específicas aplicables al código que modifica.
-
-## Rutas disponibles
-
-- `GET /`: muestra la aplicación web.
-- `GET /health`: indica si el servidor está activo.
-- `GET /api/config`: devuelve únicamente el enlace público de agenda configurado.
-- `POST /api/chat`: recibe un mensaje y devuelve la respuesta y el identificador de conversación.
-
-## Solución de problemas
-
-- **La página abre, pero el chat no responde**: revisa `FOUNDRY_PROJECT_ENDPOINT`, `FOUNDRY_AGENT_NAME`, tu inicio de sesión de Azure y los permisos de Foundry.
-- **El servidor indica que escucha en otro puerto**: abre ese puerto en el navegador. Azure define `PORT` automáticamente; localmente se usa `3000` si no se especifica.
-- **El mensaje no se acepta**: debe contener entre 1 y 2000 caracteres. Si aparece el límite de solicitudes, espera un minuto antes de volver a intentarlo.
-- **No aparece «Agendar valoración»**: configura `CLINIC_CONTACT_URL` con la URL pública aprobada y reinicia el servidor.
-- **`npm run create-agent` no crea el agente**: confirma `FOUNDRY_PROJECT_ENDPOINT`, `FOUNDRY_AGENT_NAME`, `FOUNDRY_MODEL_DEPLOYMENT`, el acceso al proyecto y que `agent/instrucciones.md` contenga el texto aprobado.
-- **Copilot no muestra los agentes personalizados**: abre la carpeta raíz del repositorio en VS Code, verifica que GitHub Copilot esté disponible y que los archivos `.agent.md` estén en `.github/agents/`. El selector puede aparecer con un nombre distinto según la versión de VS Code.
-
-## Ejecución en Azure
-
-El proyecto está preparado para ejecutarse en Azure App Service (Linux, Node 24 LTS). En Azure, configura `FOUNDRY_PROJECT_ENDPOINT`, `FOUNDRY_AGENT_NAME` y `CLINIC_CONTACT_URL` como ajustes de la aplicación y habilita una identidad administrada con los permisos necesarios en Foundry. No configures claves de acceso en archivos del proyecto. El límite en memoria es local a cada proceso y se restablece al reiniciarlo. El script de inicio de producción es `npm start`.
+La versión 2 del agente ofrecía cotizar y agendar por sí misma. La versión 4 **indica cómo hacerlo** (WhatsApp o formulario de la clínica) sin ofrecerlo, y refuerza la respuesta ante señales de alarma. Es un ejemplo del ciclo de mejora basado en pruebas.
