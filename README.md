@@ -25,6 +25,10 @@ Un chat web que responde **únicamente información general** de la clínica (se
 - **No pide ni repite datos personales o de salud**; recomienda no compartirlos.
 - Resiste intentos de saltarse sus instrucciones (*jailbreak*).
 
+### Mejora: preguntas sugeridas
+
+Debajo del saludo inicial se muestran cinco botones con preguntas frecuentes. Al elegir uno, la pregunta se envía por el mismo flujo del formulario y aparece como mensaje del usuario; los botones desaparecen después del primer mensaje, ya sea escrito o seleccionado. Esta mejora fue sugerida por el maestro en la revisión del 2 de noviembre para diferenciar el prototipo de un chat básico.
+
 ## 3. Capturas del prototipo
 
 | Pantalla inicial con aviso de IA | Servicios (respuesta del FAQ) |
@@ -42,6 +46,14 @@ Un chat web que responde **únicamente información general** de la clínica (se
 **Vista móvil**
 
 ![Móvil](docs/images/07-movil.png)
+
+| Preguntas sugeridas al inicio | Respuesta a una pregunta enviada desde un botón |
+|---|---|
+| ![Vista de escritorio con los cinco botones de preguntas sugeridas debajo del saludo](docs/images/08-preguntas-sugeridas-escritorio.png) | ![Conversación con la pregunta seleccionada como mensaje del usuario y la respuesta del asistente](docs/images/09-respuesta-desde-boton.png) |
+
+**Preguntas sugeridas en vista móvil de 360 px**
+
+![Chat en vista móvil de 360 px con la pregunta sugerida y su respuesta](docs/images/10-preguntas-sugeridas-movil-azure.png)
 
 ## 4. Arquitectura
 
@@ -104,8 +116,8 @@ La solución se evaluó con los seis principios de Microsoft para IA responsable
 | Riesgo | Medida | Evidencia |
 |---|---|---|
 | Texto difícil de leer | Contraste WCAG AA verificado: texto claro sobre tarjeta 14.55:1, dorado sobre tarjeta 5.46:1, enlaces 6.65:1, burbuja del usuario (texto blanco) 5.66:1 | `public/styles.css` |
-| Uso solo con mouse | Foco visible con teclado, etiquetas ARIA (`aria-label`, `aria-live="polite"`), área de conversación semántica | `public/index.html` |
-| Uso en celular | Diseño responsive, probado en vista móvil | `07-movil.png` |
+| Uso solo con mouse | Los botones de preguntas sugeridas son accesibles con teclado y tienen foco visible; la conversación usa etiquetas ARIA (`aria-label`, `aria-live="polite"`) y estructura semántica | `public/index.html` |
+| Uso en celular | Diseño responsive; preguntas sugeridas probadas a 360 px, con varias líneas y sin desbordamiento horizontal | `07-movil.png`, `10-preguntas-sugeridas-movil-azure.png` |
 | Idioma | Interfaz y respuestas en español | Capturas |
 
 ### 6.5 Transparencia
