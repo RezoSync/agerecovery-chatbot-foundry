@@ -2,6 +2,7 @@ const form = document.querySelector("#chat-form");
 const input = document.querySelector("#message-input");
 const sendButton = document.querySelector("#send-button");
 const messages = document.querySelector("#messages");
+const suggestedQuestions = document.querySelector("#suggested-questions");
 const typingIndicator = document.querySelector("#typing-indicator");
 const formError = document.querySelector("#form-error");
 const bookingButton = document.querySelector("#booking-button");
@@ -34,6 +35,16 @@ async function loadBookingLink() {
 }
 
 loadBookingLink();
+
+suggestedQuestions.addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+  if (!button || !suggestedQuestions.contains(button)) {
+    return;
+  }
+
+  input.value = button.textContent;
+  form.requestSubmit();
+});
 
 function cleanAssistantResponse(text) {
   return text.replace(/【[^】]*】/g, "").replace(/\s+([.,;:!?])/g, "$1");
@@ -96,6 +107,7 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
+  suggestedQuestions.hidden = true;
   appendMessage(message, "user");
   input.value = "";
   input.style.height = "auto";

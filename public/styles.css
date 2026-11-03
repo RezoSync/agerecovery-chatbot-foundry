@@ -213,6 +213,37 @@ textarea:focus-visible {
   scroll-behavior: smooth;
 }
 
+.suggested-questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: 42px;
+}
+
+.suggested-questions[hidden] {
+  display: none;
+}
+
+.suggested-questions button {
+  max-width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--ink);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+  overflow-wrap: anywhere;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.suggested-questions button:hover {
+  border-color: var(--link);
+  background: var(--user);
+}
+
 .message {
   display: flex;
   align-items: flex-start;
@@ -441,6 +472,10 @@ textarea:focus-visible {
 
   .message {
     max-width: 100%;
+  }
+
+  .suggested-questions {
+    margin-left: 0;
   }
 
   .composer {
